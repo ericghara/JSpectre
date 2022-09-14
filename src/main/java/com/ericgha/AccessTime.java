@@ -21,10 +21,10 @@ public class AccessTime {
 
     public void doFlush() {
         for (int i = 0; i < FLUSH_SIZE; i++) {
-            flush[i] = 1;
+            flush[i] ^= -1;
             if (i > OBSERVABLE_OFFSET) {
                 if (i%8 > 0) {
-                    flush[i/(i%8)]++;
+                    flush[i/(i%8)] ^= -1;
                 }
             }
         }
@@ -41,11 +41,10 @@ public class AccessTime {
         for (int i = 0; i < OBSERVABLE_SIZE; i++) {
             accessTimes[i] += timeAccess( i );
         }
-        // seems to improve signal-to-noise for spectre attack
+        // seems to improve signal-to-noise
         // Cache hit results unchanged, but the distribution
         // for misses tightens up on the low end, improving
         // differentiation b/t the two.  Only tested with serial GC
-        // Improvement not apparent in access time test
         System.gc();
     }
 
