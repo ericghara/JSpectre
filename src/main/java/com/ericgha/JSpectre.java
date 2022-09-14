@@ -64,7 +64,7 @@ public class JSpectre {
         for (int i = 0; i < attackSeq.length; i++) {
             int curIndex = attackSeq[i];
             observeSpeculative( getUnrestricted( curIndex ), accessTime );
-            if (i % ( trainCnt + 1 ) == 0) {
+            if (curIndex >= UNRESTRICTED_SIZE) {
                 accessTime.scanObservable();
                 accessTime.doFlush();
             }
@@ -114,8 +114,8 @@ public class JSpectre {
 
     public static void main(String[] args) {
         prepareData( "ABCDEFGHIJ" );
-//        AccessTime accessTime = attack( 1000, UNRESTRICTED_SIZE, 1000, new AccessTime() );
-        AccessTime accessTime = predictRestricted( UNRESTRICTED_SIZE );
+        AccessTime accessTime = attack( 1000, UNRESTRICTED_SIZE, 1000, new AccessTime() );
+//        AccessTime accessTime = predictRestricted( UNRESTRICTED_SIZE );
 //        neither of these attacks work, for both what we'd expect to see is low times for 0-9 as
 //        these elements were used for training the branch predictor, and a low result for 65
 //        as 'A' = 65.

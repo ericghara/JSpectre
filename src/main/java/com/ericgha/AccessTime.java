@@ -33,7 +33,7 @@ public class AccessTime {
     long timeAccess(int i) {
         int index = (i + 1) * OBSERVABLE_OFFSET;
         long then = System.nanoTime();
-        observable[index] += 88;
+        observable[index] ^= -1;
         return System.nanoTime() - then;
     }
 
@@ -41,11 +41,17 @@ public class AccessTime {
         for (int i = 0; i < OBSERVABLE_SIZE; i++) {
             accessTimes[i] += timeAccess( i );
         }
+        // seems to improve signal-to-noise for spectre attack
+        // Cache hit results unchanged, but the distribution
+        // for misses tightens up on the low end, improving
+        // differentiation b/t the two.  Only tested with serial GC
+        // Improvement not apparent in access time test
+        System.gc();
     }
 
     public void accessObservable(int i) {
         int index = OBSERVABLE_OFFSET * (i + 1);
-        observable[index] += 88;
+        observable[index] ^= -1;
     }
 
     public static double toMs(long ns) {

@@ -27,5 +27,5 @@ test {
 
 application {
     mainClass = 'com.ericgha.JSpectre'
-    applicationDefaultJvmArgs = ["-XX:+UseSerialGC"] // probably not necessary
+    applicationDefaultJvmArgs = ["-XX:+UseSerialGC" ] // probably not necessary
 }
