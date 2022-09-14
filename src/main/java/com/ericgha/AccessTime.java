@@ -37,7 +37,7 @@ public class AccessTime {
         return System.nanoTime() - then;
     }
 
-    void scanObservable() {
+    public void scanObservable() {
         for (int i = 0; i < OBSERVABLE_SIZE; i++) {
             accessTimes[i] += timeAccess( i );
         }
