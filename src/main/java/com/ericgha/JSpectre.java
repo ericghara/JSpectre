@@ -74,15 +74,24 @@ public class JSpectre {
 
     static int[] generateAttackSequence(int trainCnt, int restrictedIndex, int reps) {
         int[] attackSeq = new int[( trainCnt + 1 ) * reps];
-        for (int i = 0; i < attackSeq.length; i++) {
-            int elem = random.nextInt( 0, trainCnt + 1 );
-            if (elem < trainCnt) {
-                attackSeq[i] = elem % UNRESTRICTED_SIZE;
-            } else {
-                attackSeq[i] = restrictedIndex;
-            }
+        // partially fill array with unrestricted indices
+        int numUnrestricted = attackSeq.length - trainCnt;
+        for (int i = 0; i < numUnrestricted; i++) {
+            attackSeq[i] = i % UNRESTRICTED_SIZE;
         }
+        Arrays.fill(attackSeq, numUnrestricted, attackSeq.length, restrictedIndex);
+        shuffle( attackSeq );
         return attackSeq;
+    }
+
+    private static void shuffle(int[] array) {
+        // Fisher–Yates shuffle
+        for (int i = 0; i < array.length; i++) {
+            int j = random.nextInt(i, array.length);
+            int tmp = array[i];
+            array[i] = array[j];
+            array[j] = tmp;
+        }
     }
 
     private static void observeSpeculative(int i, AccessTime accessTime) {
@@ -114,8 +123,8 @@ public class JSpectre {
 
     public static void main(String[] args) {
         prepareData( "ABCDEFGHIJ" );
-//        AccessTime accessTime = attack( 1000, UNRESTRICTED_SIZE, 1000, new AccessTime() );
-        AccessTime accessTime = predictRestricted( UNRESTRICTED_SIZE );
+        AccessTime accessTime = attack( 1000, UNRESTRICTED_SIZE, 150, new AccessTime() );
+//        AccessTime accessTime = predictRestricted( UNRESTRICTED_SIZE );
 //        neither of these attacks work, for both what we'd expect to see is low times for 0-9 as
 //        these elements were used for training the branch predictor, and a low result for 65
 //        as 'A' = 65.
