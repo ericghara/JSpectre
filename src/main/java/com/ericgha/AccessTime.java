@@ -1,7 +1,5 @@
 package com.ericgha;
 
-import org.openjdk.jmh.infra.Blackhole;
-
 import java.util.Comparator;
 import java.util.Set;
 import java.util.SplittableRandom;
@@ -13,12 +11,10 @@ import java.util.stream.Stream;
 public class AccessTime {
 
     public static final int OBSERVABLE_SIZE = 256;
-    private static final int FLUSH_SIZE = 1_000_000;
+    private static final int FLUSH_SIZE = 2_000_000;
     private static final int OBSERVABLE_OFFSET = 4096;
     private static final Logger log = Logger.getLogger(AccessTime.class.getName() );
 
-
-    private RandomGenerator random = new SplittableRandom();
     private final int[] flush = new int[FLUSH_SIZE];
     private final int[] observable = new int[OBSERVABLE_OFFSET * (OBSERVABLE_SIZE +1)];
     private final long[] accessTimes = new long[OBSERVABLE_SIZE];
@@ -27,8 +23,9 @@ public class AccessTime {
         for (int i = 0; i < FLUSH_SIZE; i++) {
             flush[i] = 1;
             if (i > OBSERVABLE_OFFSET) {
-                int j = random.nextInt( 0, i - OBSERVABLE_OFFSET );
-                flush[j] = 1;
+                if (i%8 > 0) {
+                    flush[i/(i%8)]++;
+                }
             }
         }
     }
@@ -47,7 +44,12 @@ public class AccessTime {
     }
 
     public void accessObservable(int i) {
-        observable[OBSERVABLE_OFFSET * (i + 1)] += 1;
+        int index = OBSERVABLE_OFFSET * (i + 1);
+        observable[index] += 88;
+    }
+
+    public static double toMs(long ns) {
+        return ns / (double) 1_000;
     }
 
     public int[] getObservable() {
@@ -56,14 +58,14 @@ public class AccessTime {
 
     public long[] report() {
         for (int i = 0; i < OBSERVABLE_SIZE; i++) {
-            System.out.printf("%d: %d ns.%n", i, accessTimes[i]);
+            System.out.printf("%d: %.3f ms.%n", i, toMs(accessTimes[i]) );
         }
         System.out.print("Lowest three: ");
         IntStream.range(0, OBSERVABLE_SIZE).boxed()
                 .map( i -> new int[] {(int) accessTimes[i] ,i} )
                 .sorted( Comparator.comparingInt( tupA -> tupA[0] ) )
                 .limit(3)
-                .forEach(tup -> System.out.printf(" %d: %dns,", tup[1], tup[0]) );
+                .forEach(tup -> System.out.printf(" %d: %.3f ms,", tup[1], toMs(tup[0]) ) );
         System.out.print(".\n");
 
         return accessTimes;
@@ -71,7 +73,7 @@ public class AccessTime {
 
     public static void main(String[] args) {
         AccessTime accessTime = new AccessTime();
-        Set<Integer> toAccess = Set.of(13);
+        Set<Integer> toAccess = Set.of(2,65);
         for (int i = 0; i < 700; i++) {
             accessTime.doFlush();
             toAccess.forEach( accessTime::accessObservable );
