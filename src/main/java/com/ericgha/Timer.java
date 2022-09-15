@@ -1,11 +1,12 @@
 package com.ericgha;
 
+import java.util.UUID;
 import java.util.logging.Logger;
 
 /**
  * <b>Don't use. {@link System#nanoTime()} is far better</b>
  * <p>
- * This was a proof of concept to see if it was possible to create a time with greater resolution than {@link System#nanoTime() };
+ * This was a proof of concept to see if it was possible to create a timer with greater resolution than {@link System#nanoTime() };
  * <p>
  * Some concurrency compromises were made to reduce the interval between tics.  {@code time} should only be modified
  * from one thread. Time will be read from 2 threads, so there is the chance for a stale read.
@@ -19,7 +20,7 @@ public class Timer extends Thread {
 
 
     public Timer() {
-        super();
+        super("Timer: " + UUID.randomUUID());
     }
 
     @Override
